@@ -16,6 +16,7 @@ private:
 	Comp *top = 0;
 	Comp *front = 0;
 	int size = 0;
+	
 public:
 	deq();
 	~deq();
