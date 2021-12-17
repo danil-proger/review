@@ -80,3 +80,4 @@ int main() {
         cout << mas[sparse1.answer(x, y, mas)] << '\n';
     }
 }
+
