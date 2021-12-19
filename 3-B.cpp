@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <assert.h>
 
 using namespace std;
 
@@ -25,13 +26,16 @@ int Bitree::g(int pos) {
     return pos | (pos + 1);
 }
 
-Bitree::Bitree(const vector<int> &mas) {
-    tree.resize(mas.size());
-    for (int i = 0; i < mas.size(); ++i){
-        for (int j = f(i); j < i + 1; ++j){
-            tree[i] += mas[j];
-        }
+Bitree::Bitree(const vector<int> &mas) : tree(mas){
+    assert(!tree.empty());
+
+    for (unsigned long i = 1; i < tree.size(); ++i) {
+        tree[i] += tree[i - 1];
     }
+    for(int i = tree.size() - 1; i > 0; --i){
+        if (f(i) - 1 >= 0) tree[i] -= tree[f(i) - 1];
+    }
+
 }
 int Bitree::Getsum(int l, int r) {
     if (l == 0) {
