@@ -1,4 +1,4 @@
-﻿#include <fstream>
+#include <fstream>
 #include <string>
 #include <utility>
 #include <queue>
@@ -6,60 +6,74 @@
 
 
 using namespace std;
-long long ans = 0;
+long long answer = 0;
 
 
 vector<long long> Merge(vector<long long> left, vector<long long> right) {
-	int i = 0;
-	int j = 0;
-	vector<long long> res;
-	while ((i < left.size()) && (j < right.size())) {
-		if (left[i] > right[j]) {
-			res.push_back(right[j]);
-			ans += left.size() - i;
-			j++;
-		}
-		else {
-			res.push_back(left[i]);
-			i++;
-		}
-	}
-	while (i < left.size()) {
-		res.push_back(left[i]);
-		i++;
-	}
-	while (j < right.size()) {
-		res.push_back(right[j]);
-		j++;
-	}
-	return res;
+    long long i = 0;
+    long long j = 0;
+    vector<long long> result;
+
+    while ((i < left.size()) && (j < right.size())) {
+        if (left[i] > right[j]) {
+            result.push_back(right[j]);
+            j++;
+        }
+        else {
+            result.push_back(left[i]);
+            i++;
+            answer += j;
+        }
+    }
+
+    while (j < right.size()) {
+        result.push_back(right[j]);
+        j++;
+    }
+
+    while (i < left.size()) {
+        result.push_back(left[i]);
+        i++;
+        answer += j;
+    }
+
+    return result;
+}
+
+
+vector<long long> alg(vector<long long> &sort) {
+    if (sort.size() == 1) return sort;
+    unsigned long size = sort.size();
+    vector<long long> left;
+    vector<long long> right;
+
+    for (long long i = 0; i < (size + 1) / 2; ++i) {
+        left.push_back(sort[i]);
+    }
+
+    for(unsigned long i = (size + 1) / 2; i < size; ++i) {
+        right.push_back(sort[i]);
+    }
+
+    return Merge(alg(left), alg(right));
 }
 
 
 int main() {
-	std::ifstream fin("inverse.in");
-	std::ofstream fout("inverse.out");
-	int n, input;
-	fin >> n;
-	queue<vector<long long>> merge;
-	vector< long long> left, right;
-	for (int i = 0; i < n; i++) {
-		fin >> input;
-		merge.push({ input });
-	}
-	int step = 1;
-	while (step < n) {
-		step *= 2;
-	}
-	for (int i = n; i < step; i++) {
-		merge.push({ 10000000000 });
-	}
-	while (merge.size() > 1) {
-		left = merge.front();
-		merge.pop();
-		right = merge.front();
-		merge.pop();
-		merge.push(Merge(left, right));
-	}
-	fout << ans;
+    ifstream fin("inverse.in");
+    ofstream fout("inverse.out");
+    long long n, input;
+    fin >> n;
+    vector<long long> merge(n);
+
+    for (long long i = 0; i < n; i++) {
+        fin >> merge[i];
+    }
+
+    if (merge.size() == 1) fout << 0;
+    else {
+        alg(merge);
+        fout << answer;
+    }
+    return 0;
 }
