@@ -1,6 +1,4 @@
-#include <iostream>
-#include <string>
-#include <fstream>
+﻿#include <iostream>
 #include <vector>
 #include <algorithm>
 
@@ -24,9 +22,20 @@ int Partition(vector<int> &A, int l, int r) {
 int QuickSelect(vector<int> &A, int k, int l, int r) {
     if (A.size() == 1) return A[0];
     int part = Partition(A, l, r);
-    if (k < part) return QuickSelect(A, k, l, part-1);
+    while (A.size() != 1 && k != part) {
+        if (A.size() == 1) return A[0];
+        if (k < part) {
+            r = part - 1;
+            part = Partition(A, l, r);
+        }
+        if (k > part) {
+            l = part + 1;
+            part = Partition(A, l, r);
+        }
+        if (k == part) return A[part];
+    }
+    if (A.size() == 1) return A[0];
     if (k == part) return A[part];
-    if (k > part) return QuickSelect(A, k, part+1, r);
 }
 
 int main() {
