@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <bits/stdc++.h>
 #include <vector>
 #include <string>
@@ -26,9 +26,9 @@ private:
 
     node* removemin(node * p);
 
-    int pred(node * first, int x, int& max);
+    bool pred(node * first, int x, int& max);
 
-    int Next(node* first, int x, int &min);
+    bool Next(node* first, int x, int &min);
 
     bool find(node* first, int x);
 
@@ -41,13 +41,13 @@ public:
 
     long long h(node* tree);
 
-    int balancef(node* tree);
+    int balancetree(node* tree);
 
     void fix(node* tree);
 
-    node* rotright(node* tree);
+    node* rotateright(node* tree);
 
-    node* rotleft(node* tree);
+    node* rotateleft(node* tree);
 
     node* balance(node* tree);
 
@@ -61,9 +61,9 @@ public:
 
     bool exist(int x);
 
-    int prev(int x, int& ans);
+    bool prev(int x, int& ans);
 
-    int next(int x, int &ans);
+    bool next(int x, int &ans);
 };
 
 AVL::node::~node() {
@@ -72,7 +72,7 @@ AVL::node::~node() {
 
 }
 
-int AVL::balancef(AVL::node *tree) {
+int AVL::balancetree(AVL::node *tree) {
     return h(tree->right) - h(tree->left);
 }
 
@@ -88,7 +88,7 @@ void AVL::fix(AVL::node *tree) {
     else tree->height = hr + 1;
 }
 
-AVL::node *AVL::rotright(AVL::node *tree) {
+AVL::node *AVL::rotateright(AVL::node *tree) {
     node* copy = tree->left;
     tree->left = copy->right;
     copy->right = tree;
@@ -97,7 +97,7 @@ AVL::node *AVL::rotright(AVL::node *tree) {
     return copy;
 }
 
-AVL::node *AVL::rotleft(AVL::node *tree) {
+AVL::node *AVL::rotateleft(AVL::node *tree) {
     node* copy = tree->right;
     tree->right = copy->left;
     copy->left = tree;
@@ -108,17 +108,17 @@ AVL::node *AVL::rotleft(AVL::node *tree) {
 
 AVL::node *AVL::balance(AVL::node *tree) {
     fix(tree);
-    if (balancef(tree) == 2) {
-        if (balancef(tree->right) < 0) {
-            tree->right = rotright(tree->right);
+    if (balancetree(tree) == 2) {
+        if (balancetree(tree->right) < 0) {
+            tree->right = rotateright(tree->right);
         }
-        return rotleft(tree);
+        return rotateleft(tree);
     }
-    if (balancef(tree) == -2) {
-        if (balancef(tree->left) > 0) {
-            tree->left = rotleft(tree->left);
+    if (balancetree(tree) == -2) {
+        if (balancetree(tree->left) > 0) {
+            tree->left = rotateleft(tree->left);
         }
-        return rotright(tree);
+        return rotateright(tree);
     }
     return tree;
 }
@@ -171,7 +171,7 @@ void AVL::removeminimum() {
     first = removemin(first);
 }
 
-int AVL::pred(AVL::node *tree, int x, int& ans) {
+bool AVL::pred(AVL::node *tree, int x, int& ans) {
     if (!tree) return false;
     if (tree->key >= x) {
         return pred(tree->left, x, ans);
@@ -198,7 +198,7 @@ bool AVL::find(AVL::node *tree, int x) {
     return false;
 }
 
-int AVL::prev(int x, int& ans) {
+bool AVL::prev(int x, int& ans) {
     return pred(first, x, ans);
 }
 
@@ -206,11 +206,11 @@ void AVL::del(int k) {
     first = remove(first, k);
 }
 
-int AVL::next(int x, int &ans) {
+bool AVL::next(int x, int &ans) {
     return Next(first, x , ans);
 }
 
-int AVL::Next(AVL::node *tree, int x, int &ans) {
+bool AVL::Next(AVL::node *tree, int x, int &ans) {
     if (!tree) return false;
     if (tree->key <= x) return Next(tree->right, x, ans);
     if (!Next(tree->left, x, ans)) ans = tree->key;
