@@ -1,15 +1,12 @@
-#include <fstream>
+﻿#include <fstream>
 #include <string>
-#include <utility>
 #include <queue>
 #include <algorithm>
-
 
 using namespace std;
 long long answer = 0;
 
-
-vector<long long> Merge(vector<long long> left, vector<long long> right) {
+vector<long long> inversions(vector<long long> left, vector<long long> right) {
     long long i = 0;
     long long j = 0;
     vector<long long> result;
@@ -41,7 +38,7 @@ vector<long long> Merge(vector<long long> left, vector<long long> right) {
 }
 
 
-vector<long long> alg(vector<long long> &sort) {
+vector<long long> Merge(vector<long long> &sort) {
     if (sort.size() == 1) return sort;
     unsigned long size = sort.size();
     vector<long long> left;
@@ -55,7 +52,7 @@ vector<long long> alg(vector<long long> &sort) {
         right.push_back(sort[i]);
     }
 
-    return Merge(alg(left), alg(right));
+    return inversions(Merge(left), Merge(right));
 }
 
 
@@ -72,7 +69,7 @@ int main() {
 
     if (merge.size() == 1) fout << 0;
     else {
-        alg(merge);
+        Merge(merge);
         fout << answer;
     }
     return 0;
