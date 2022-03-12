@@ -1,0 +1,49 @@
+﻿#include <bits/stdc++.h>
+#include <limits>
+
+long long INF = std::numeric_limits<long long>::max();
+
+int main() {
+    long long n;
+    std::cin >> n;
+    std::vector<long long> input(n);
+    std::vector<long long> pos(n + 1);
+    std::vector<long long> prev(n, -1);
+    std::vector<long long> result;
+    std::vector<long long> dp(n + 1);
+    pos[0] = -1;
+    long long length = 0;
+
+    for(long long i = 0; i < n; ++i) {
+        std::cin >> input[i];
+    }
+
+    std::reverse(input.begin(), input.end());
+    for(long long i = 1; i < n + 1; ++i) {
+        dp[i] = INF;
+    }
+
+    dp[0] = -INF;
+    for(long long i = 1; i < n + 1; ++i) {
+        long long j = (long long) (std::upper_bound(dp.begin(), dp.end(), input[i - 1]) - dp.begin());
+        if (dp[j - 1] <= input[i - 1] && dp[j] >= input[i - 1]) {
+            dp[j] = input[i - 1];
+            pos[j] = i - 1;
+            prev[i - 1] = pos[j - 1];
+            if(length < j) {
+                length = j;
+            }
+        }
+    }
+
+    long long index = pos[length];
+    while (index != -1) {
+        result.push_back(index);
+        index = prev[index];
+    }
+
+    std::cout << length << '\n';
+    for (long long i : result) {
+        std::cout << n - i << " ";
+    }
+}
