@@ -1,0 +1,75 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+long long mod = 1e9 + 7;
+
+pair<int, int> alg(const vector<vector<char>>& mas, size_t mask, size_t m) {
+    bool p = true;
+    int last = -1;
+    for(int i = mas.size() - 1; i >= 0; --i) {
+        auto copy = mask & 1;
+        if (((mas[i][m] == '+') && ((mask & 1) == 0)))  {
+            return pair(false, false);
+        }
+        if (((mas[i][m] == '-') && (copy == 1))) {
+            return pair(false, false);
+        }
+        if (copy == last) {
+            p = false;
+        }
+        last = copy;
+        mask = mask >> 1;
+    }
+    return pair(true, p);
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    vector<vector<char>> mas(n, vector<char>(m));
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < m; ++j) {
+            cin >> mas[i][j];
+        }
+    }
+    auto copy = (1 << n);
+    vector<vector<long long>> dp(m, vector<long long>(copy));
+    for (size_t i = 0; i < copy; ++i) {
+        dp[0][i] = 1;
+    }
+    for (size_t i = 0; i < m - 1; ++i) {
+        for (size_t j = 0; j < copy; ++j) {
+            pair<bool, bool> a = alg(mas, j, i);
+            if((a.first) && (a.second)) {
+                pair<bool, bool> h = alg(mas, j, i + 1);
+                if (h.first) {
+                    auto t = dp[i + 1][j] + dp[i][j];
+                    dp[i + 1][j] = t % mod;
+                }
+                pair<bool, bool> h1 = alg(mas, j^((1 << n)-1), i+1);
+                if (h1.first) {
+                    auto t = dp[i + 1][j^(copy - 1)] + dp[i][j];
+                    dp[i+1][j^((1 << n)-1)] = t % mod;
+                }
+            }
+            else if(a.first) {
+                pair<bool, bool> h1 = alg(mas, j^(copy - 1), i+1);
+                if (h1.first) {
+                    auto t = dp[i+1][j^((1 << n)-1)] + dp[i][j];
+                    dp[i+1][j^((1 << n)-1)] = t % mod;
+                }
+            }
+        }
+    }
+    long long answer = 0;
+    for (size_t j = 0; j < copy; ++j) {
+        pair<bool, bool> a = alg(mas, j, m-1);
+        if (a.first) {
+            auto copy1 = (answer + dp[m - 1][j]);
+            answer = copy1 % mod;
+        }
+    }
+    cout << answer;
+
+}
