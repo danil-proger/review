@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+vector<vector<long long>> alg(vector<vector<long long>>& a, vector<vector<long long>>& b) {
+    long long n = a.size();
+    long long n1 =  b.size();
+    vector<vector<long long>> res(a.size(), vector<long long>(n));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < b[0].size(); ++j) {
+            for (int k = 0; k < n1; ++k) {
+                long long m = a[i][k] * b[k][j];
+                res[i][j] += m;
+            }
+        }
+    }
+    return res;
+}
+
+vector<vector<long long>> create(long long n, vector<vector<long long>> a) {
+    size_t r = a.size();
+    vector<vector<long long>> ans(r, vector<long long> (r));
+    for(long long i = 0; i < r; ++i) {
+        ans[i][i] = 1;
+    }
+    if (n == 0) {
+        return ans;
+    }
+    if (n % 2 != 1) {
+        ans = create(n / 2, a);
+        return alg(ans, ans);
+    }
+    ans = create(n - 1, a);
+    return alg(a, ans);
+}
+
+bool pat(int mask1, int mask2, long long r) {
+    for (int i = 0; i < r - 1; ++i) {
+        long long a = (mask1 >> i);
+        long long b = (mask2 >> i);
+        long long a1 = (mask1 >> (i + 1));
+        long long b1 = (mask2 >> (i + 1));
+        if ((a & 1) == (b & 1) && (b & 1) == (b1 & 1) && (a1 & 1) == (b1 & 1)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    int mx = max(n, m);
+    int mi = min(m, n);
+    vector<vector<long long>> matrix(1 << min(m, n), vector<long long>(1 << min(m, n)));
+    for (int i = 0; i < (1 << min(m, n)); ++i) {
+        for (int j = 0; j < (1 << min(m, n)); ++j) {
+            if (pat(i, j, min(m, n))) {
+                matrix[i][j] = 1;
+            }
+        }
+    }
+    vector<vector<long long>> a = create(mx - 1, matrix);
+    long long ans = 0;
+    for (int i = 0; i < (1 << mi); ++i) {
+        for (int j = 0; j < (1 << mi); ++j) {
+            ans += a[i][j];
+        }
+    }
+    cout << ans << '\n';
+}
