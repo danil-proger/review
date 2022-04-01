@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+long long mod = 1e9 + 7;
+
+long long alg(long long n) {
+    long long a = 2;
+    long long ans = 1;
+    long long per;
+    while (n > 0) {
+        if (n % 2 == 1) {
+            per = (a % mod);
+            ans = (ans * per) % mod;
+        }
+        a *= a;
+        a %= mod;
+        n = n >> 1;
+    }
+    return ans;
+}
+
+int main() {
+    long long k;
+    cin >> k;
+    long long p = 1;
+    long long a, r;
+
+    for(size_t i = 0; i < k; ++i) {
+        cin >> a;
+        r = a % (mod - 1);
+        p *= r;
+        p %= (mod - 1);
+    }
+
+    p = (p + mod - 2) % (mod - 1);
+    long long d = alg(p);
+    long long num;
+    if (p % 2) {
+        num = (d + 1) % mod;
+    }
+    else {
+        num = (d - 1 + mod) % mod;
+    }
+    long long q = (num * 333333336) % mod;
+    cout << q<< '/' << d % mod << '\n';
+}
