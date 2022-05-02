@@ -1,29 +1,15 @@
-﻿#include <bits/stdc++.h>
+#include <bits/stdc++.h>
 #include <limits>
 
 long long INF = std::numeric_limits<long long>::max();
+std::vector<long long> input;
+std::vector<long long> pos;
+std::vector<long long> prev;
+std::vector<long long> result;
+std::vector<long long> dp;
+long long n, length;
 
-int main() {
-    long long n;
-    std::cin >> n;
-    std::vector<long long> input(n);
-    std::vector<long long> pos(n + 1);
-    std::vector<long long> prev(n, -1);
-    std::vector<long long> result;
-    std::vector<long long> dp(n + 1);
-    pos[0] = -1;
-    long long length = 0;
-
-    for(long long i = 0; i < n; ++i) {
-        std::cin >> input[i];
-    }
-
-    std::reverse(input.begin(), input.end());
-    for(long long i = 1; i < n + 1; ++i) {
-        dp[i] = INF;
-    }
-
-    dp[0] = -INF;
+void answer()  {
     for(long long i = 1; i < n + 1; ++i) {
         long long j = (long long) (std::upper_bound(dp.begin(), dp.end(), input[i - 1]) - dp.begin());
         if (dp[j - 1] <= input[i - 1] && dp[j] >= input[i - 1]) {
@@ -35,7 +21,6 @@ int main() {
             }
         }
     }
-
     long long index = pos[length];
     while (index != -1) {
         result.push_back(index);
@@ -46,4 +31,28 @@ int main() {
     for (long long i : result) {
         std::cout << n - i << " ";
     }
+}
+
+int main() {
+    std::cin >> n;
+    input.resize(n);
+    pos.resize(n + 1);
+    prev.resize(n, -1);
+    dp.resize(n + 1);// dp[i] - конец не возрастающей подпоследовательности с длиной dp[i]
+                             // d[i] = max(d[j] + 1) , j = 0, 1 .... i - 1
+    pos[0] = -1;
+    length = 0;
+
+    for(long long i = 0; i < n; ++i) {
+        std::cin >> input[i];
+    }
+
+    std::reverse(input.begin(), input.end());
+    for(long long i = 1; i < n + 1; ++i) {
+        dp[i] = INF;
+    }
+
+    dp[0] = -INF;
+    answer();
+
 }
