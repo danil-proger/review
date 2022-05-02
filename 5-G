@@ -1,19 +1,8 @@
-﻿#include <bits/stdc++.h>
+#include <bits/stdc++.h>
 
-int main() {
-    int N, M;
-    std::cin >> N;
-    std::vector<int> array_first(N), array_second(M);
-    for(int i = 0; i < N; ++i) {
-        std::cin >> array_first[i];
-    }
-    std::cin >> M;
-    std::vector<std::vector<int>> dp(N + 1, std::vector<int>(M + 1));
-    for(int i = 0; i < M; ++i){
-        std::cin >> array_second[i];
-    }
-    for(int i = 1; i < N + 1; ++i) {
-        for(int j = 1; j < M + 1; ++j) {
+void answer(int N, int M, std::vector<int> array_first, std::vector<int> array_second, std::vector<std::vector<int>> dp) {
+    for(size_t i = 1; i < N + 1; ++i) {
+        for(size_t j = 1; j < M + 1; ++j) {
             if (array_first[i - 1] != array_second[j - 1]) {
                 dp[i][j] = std::max(dp[i - 1][j], dp[i][j - 1]);
             }
@@ -23,4 +12,20 @@ int main() {
         }
     }
     std::cout << dp[N][M];
+}
+
+int main() {
+    int N, M;
+    std::cin >> N;
+    std::vector<int> array_first(N);
+    for(size_t i = 0; i < N; ++i) {
+        std::cin >> array_first[i];
+    }
+    std::cin >> M;
+    std::vector<int> array_second(M);
+    std::vector<std::vector<int>> dp(N + 1, std::vector<int>(M + 1));
+    for(size_t i = 0; i < M; ++i){
+        std::cin >> array_second[i];
+    }
+    answer(N, M, array_first, array_second, dp);
 }
