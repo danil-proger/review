@@ -3,7 +3,9 @@
 
 long long INF = std::numeric_limits<long long>::max();
 
-void answer(std::vector<std::vector<long long>> dp, int n) {
+long long peaceful_sets(long long n) {
+    std::vector<std::vector<long long>> dp(n + 1, std::vector<long long>(n + 1));
+    dp[0][0] = 1;
     for(long long i = 0; i < n + 1; ++i) {
         for(long long j = 0; j < n + 1; ++j) {
             if (dp[i][j] > 0) {
@@ -17,7 +19,7 @@ void answer(std::vector<std::vector<long long>> dp, int n) {
     for(long long i = 0; i < n + 1; ++i) {
         result += dp[n][i];
     }
-    std::cout << result / 2;
+    return result / 2;
 }
 
 int main() {
@@ -25,8 +27,6 @@ int main() {
     std::cin.tie(nullptr);
     long long n;
     std::cin >> n;
-    std::vector<std::vector<long long>> dp(n + 1, std::vector<long long>(n + 1));
     //dp[i][j] содержит количество мирных множеств с максимальным элементом i и степенью j. Ответ - сумма dp[n][i].Пересчёт очевиден.
-    dp[0][0] = 1;
-    answer(dp, n);
+    std::cout << peaceful_sets(n);
 }
