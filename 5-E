@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+#include <limits>
+
+long long INF = std::numeric_limits<long long>::max();
+
+long long peaceful_sets(long long n) {
+    std::vector<std::vector<long long>> dp(n + 1, std::vector<long long>(n + 1));
+    dp[0][0] = 1;
+    for(long long i = 0; i < n + 1; ++i) {
+        for(long long j = 0; j < n + 1; ++j) {
+            if (dp[i][j] > 0) {
+                for (long long value = 2 * j; value < n + 1 - i; ++value) {
+                    dp[i + value][value] += dp[i][j];
+                }
+            }
+        }
+    }
+    long long result = 0;
+    for(long long i = 0; i < n + 1; ++i) {
+        result += dp[n][i];
+    }
+    return result / 2;
+}
+
+int main() {
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+    long long n;
+    std::cin >> n;
+    //dp[i][j] содержит количество мирных множеств с максимальным элементом i и степенью j. Ответ - сумма dp[n][i].Пересчёт очевиден.
+    std::cout << peaceful_sets(n);
+}
