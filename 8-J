@@ -1,0 +1,168 @@
+#include <iostream>
+#include <queue>
+#include <unordered_map>
+#include <unordered_set>
+
+#pragma optimize("O3")
+#pragma GCC optimize("Ofast,no-stack-protector")
+#pragma GCC target("sse4")
+
+using namespace std;
+
+uint64_t Tag(uint64_t pos, uint64_t ind) {
+    auto copy = (pos >> (15 - ind) * 4);
+    return copy & 15;
+}
+
+uint64_t manhatan(uint64_t pos) {
+    uint64_t m = 0;
+    long long k;
+    for (int i = 0; i < 16; ++i) {
+        k = Tag(pos, i);
+        if (k) {
+            auto sum = abs(i % 4 - (k - 1) % 4) + abs(i / 4 - (k) / 4);
+            m += sum;
+        }
+    }
+    return m;
+}
+
+uint64_t Zero(uint64_t pos) {
+    for (uint64_t i = 0; i < 16; ++i) {
+        if (!Tag(pos, i)) {
+            return i;
+        }
+    }
+}
+
+uint64_t pos(uint64_t ind, uint64_t pos, uint64_t index) {
+    uint64_t b = Tag(pos, ind);
+    auto b_first = (b << (15 - ind) * 4);
+    auto b_second = (b << (15 - index) * 4);
+    pos -= b_first;
+    pos += b_second;
+    return pos;
+}
+
+bool alg() {
+
+}
+
+bool correct(uint64_t pos) {
+    uint64_t pos_z = Zero(pos);
+    uint64_t k = pos_z / 4 + 1;
+    for (uint64_t i = 0; i < 16; ++i) {
+        long long copy_i = Tag(pos, i);
+        if (copy_i) {
+            for (uint64_t j = 0; j < i; ++j) {
+                long long copy_j = Tag(pos, j);
+                if (copy_i < copy_j) {
+                    ++k;
+                }
+            }
+        }
+    }
+    return (k % 2 == 0);
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    uint64_t start = 0;
+    uint64_t finish = 0;
+    unordered_map<uint64_t , int> result;
+    unordered_map<uint64_t, char> parent;
+    unordered_set<uint64_t> used;
+
+    auto comp = [](const pair<int, uint64_t>& a, const pair<int, uint64_t>& b) {return a.first * 1.7 > b.first * 1.7;};
+    for (size_t i = 0; i < 16; ++i) {
+        uint64_t n;
+        cin >> n;
+        uint64_t help = (n << ((15 - i) * 4));
+        start += help;
+    }
+    if (!correct(start)) {
+        cout << -1 << endl;
+        return 0;
+    }
+    for (uint64_t i = 0; i < 16; ++i) {
+        uint64_t copy = ((i + 1) % 16) << ((15 - i) * 4);
+        finish += copy;
+    }
+    priority_queue<pair<int, uint64_t>, vector<pair<int, uint64_t>>, decltype(comp)> heap(comp);
+    heap.push({0, start});
+    unordered_map<uint64_t, int> d;
+    d[start] = 0;
+    while (!heap.empty()) {
+        auto v = heap.top();
+        heap.pop();
+        int x = 0;
+        if (v.second == finish) break;
+        if (used.find(v.second) != used.end()) continue;
+        int y = 0;
+        used.insert(v.second);
+        uint64_t index = Zero(v.second);
+        if (index / 4 != 0) {
+            ++y;
+            uint64_t to = pos(index - 4, v.second, index);
+            auto copy = d[v.second];
+            if (d[to] > copy + 1 || used.find(to) == used.end()) {
+                heap.push({manhatan(to), to});
+                d[to] = ++copy;
+                parent[to] = 'D';
+            }
+        }
+        
+        if (index % 4 != 0) {
+            uint64_t to = pos(index - 1, v.second, index);
+            auto copy = d[v.second];
+            if (d[to] > copy + 1 || used.find(to) == used.end()) {
+                heap.push({(manhatan(to)), to});
+                d[to] = ++copy;
+                parent[to] = 'R';
+            }
+        }
+
+        if (index / 4 != 3) {
+            uint64_t to = pos(index + 4, v.second, index);
+            auto copy = d[v.second];
+            if (d[to] > copy + 1 || used.find(to) == used.end()) {
+                heap.push({(manhatan(to)), to});
+                d[to] = ++copy;
+                parent[to] = 'U';
+            }
+        }
+
+        if (index % 4 != 3) {
+            uint64_t to = pos(index + 1, v.second, index);
+            auto copy = d[v.second];
+            if (d[to] > copy + 1 || used.find(to) == used.end()) {
+                heap.push({(manhatan(to)), to});
+                d[to] = ++copy;
+                parent[to] = 'L';
+            }
+        }
+    }
+    string ans;
+    while (finish != start) {
+        uint64_t index = Zero(finish);
+        vector<int> res;
+        char ls = parent[finish];
+        ans = ls + ans;
+        if (ls == 'D') {
+            finish = pos(index + 4, finish, index);
+        }
+        else if (ls == 'U') {
+            finish = pos(index - 4, finish, index);
+        }
+        else if (ls == 'L') {
+            finish = pos(index - 1, finish, index);
+        }
+        else {
+            finish = pos(index + 1, finish, index);
+        }
+    }
+
+    cout << ans.length() << endl;
+    cout << ans << endl;
+}
