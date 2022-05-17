@@ -1,0 +1,65 @@
+﻿#include <iostream>
+#include <vector>
+
+using namespace std;
+int first, last;
+
+bool dfs(int v, vector<vector<int>>& g, vector<int>& used, vector<int>& p) {
+    used[v] = 0;
+    auto n = g[v].size();
+    for (int i = 0; i < n; ++i) {
+        int u = g[v][i];
+        if (used[u] == -1) {
+            p[u] = v;
+            if (dfs(u, g, used, p)) {
+                return true;
+            }
+        }
+        if (used[u] == 0) {
+            last = v;
+            first = u;
+            return true;
+        }
+    }
+    used[v] = 1;
+    return false;
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> a(n);
+    vector<int> used(n, -1);
+    vector<int> b;
+    bool fl = false;
+    vector<int> p(n);
+
+    for (int i = 0; i < m; ++i) {
+        int x, y;
+        cin >> x >> y;
+        --x;
+        --y;
+        a[x].push_back(y);
+    }
+
+    for (int i = 0; i < n; ++i) {
+        fl = dfs(i, a, used, p);
+        if (fl) {
+            break;
+        }
+    }
+
+    if (!fl) cout << "NO";
+    else {
+        while(last != first) {
+            b.push_back(last);
+            last = p[last];
+        }
+        b.push_back(first);
+        cout << "YES" << '\n';
+        for (int i = b.size() - 1; i >= 0; --i) {
+            cout << b[i] + 1 << " ";
+        }
+    }
+    return 0;
+}
