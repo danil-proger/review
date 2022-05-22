@@ -1,0 +1,81 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+long long mod = 1e9 + 7;
+
+pair<int, int> get_cities(const vector<vector<char>>& mas, size_t mask, size_t m) {
+    bool p = true;
+    int last = -1;
+    for(int i = mas.size() - 1; i >= 0; --i) {
+        auto copy = mask & 1;
+        if (((mas[i][m] == '+') && ((mask & 1) == 0)))  {
+            return pair(false, false);
+        }
+        if (((mas[i][m] == '-') && (copy == 1))) {
+            return pair(false, false);
+        }
+        if (copy == last) {
+            p = false;
+        }
+        last = copy;
+        mask = mask >> 1;
+    }
+    return pair(true, p);
+}
+
+long long get_hungry(vector<vector<char>> &mas, int m, int n, vector<vector<long long>> dp) {
+    auto copy = (1 << n);
+    for (size_t i = 0; i < m - 1; ++i) {
+        for (size_t j = 0; j < copy; ++j) {
+            pair<bool, bool> a = get_cities(mas, j, i);
+            if((a.first) && (a.second)) {
+                pair<bool, bool> h = get_cities(mas, j, i + 1);
+                if (h.first) {
+                    auto t = dp[i + 1][j] + dp[i][j];
+                    dp[i + 1][j] = t % mod;
+                }
+                pair<bool, bool> h1 = get_cities(mas, j^((1 << n)-1), i+1);
+                if (h1.first) {
+                    auto t = dp[i + 1][j^(copy - 1)] + dp[i][j];
+                    dp[i+1][j^((1 << n)-1)] = t % mod;
+                }
+            }
+            else if(a.first) {
+                pair<bool, bool> h1 = get_cities(mas, j^(copy - 1), i+1);
+                if (h1.first) {
+                    auto t = dp[i+1][j^((1 << n)-1)] + dp[i][j];
+                    dp[i+1][j^((1 << n)-1)] = t % mod;
+                }
+            }
+        }
+    }
+    long long answer = 0;
+    for (size_t j = 0; j < copy; ++j) {
+        pair<bool, bool> a = get_cities(mas, j, m-1);
+        if (a.first) {
+            auto copy1 = (answer + dp[m - 1][j]);
+            answer = copy1 % mod;
+        }
+    }
+    return answer;
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    vector<vector<char>> mas(n, vector<char>(m));
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < m; ++j) {
+            cin >> mas[i][j];
+        }
+    }
+    auto copy = (1 << n);
+    vector<vector<long long>> dp(m, vector<long long>(copy));
+    for (size_t i = 0; i < copy; ++i) {
+        dp[0][i] = 1;
+    }
+    long long answer = get_hungry(mas, m, n, dp);
+    cout << answer;
+
+}
