@@ -4,7 +4,7 @@
 using namespace std;
 long long mod = 1e9 + 7;
 
-pair<int, int> alg(const vector<vector<char>>& mas, size_t mask, size_t m) {
+pair<int, int> get_cities(const vector<vector<char>>& mas, size_t mask, size_t m) {
     bool p = true;
     int last = -1;
     for(int i = mas.size() - 1; i >= 0; --i) {
@@ -24,6 +24,43 @@ pair<int, int> alg(const vector<vector<char>>& mas, size_t mask, size_t m) {
     return pair(true, p);
 }
 
+long long get_hungry(vector<vector<char>> &mas, int m, int n, vector<vector<long long>> dp) {
+    auto copy = (1 << n);
+    for (size_t i = 0; i < m - 1; ++i) {
+        for (size_t j = 0; j < copy; ++j) {
+            pair<bool, bool> a = get_cities(mas, j, i);
+            if((a.first) && (a.second)) {
+                pair<bool, bool> h = get_cities(mas, j, i + 1);
+                if (h.first) {
+                    auto t = dp[i + 1][j] + dp[i][j];
+                    dp[i + 1][j] = t % mod;
+                }
+                pair<bool, bool> h1 = get_cities(mas, j^((1 << n)-1), i+1);
+                if (h1.first) {
+                    auto t = dp[i + 1][j^(copy - 1)] + dp[i][j];
+                    dp[i+1][j^((1 << n)-1)] = t % mod;
+                }
+            }
+            else if(a.first) {
+                pair<bool, bool> h1 = get_cities(mas, j^(copy - 1), i+1);
+                if (h1.first) {
+                    auto t = dp[i+1][j^((1 << n)-1)] + dp[i][j];
+                    dp[i+1][j^((1 << n)-1)] = t % mod;
+                }
+            }
+        }
+    }
+    long long answer = 0;
+    for (size_t j = 0; j < copy; ++j) {
+        pair<bool, bool> a = get_cities(mas, j, m-1);
+        if (a.first) {
+            auto copy1 = (answer + dp[m - 1][j]);
+            answer = copy1 % mod;
+        }
+    }
+    return answer;
+}
+
 int main() {
     int n, m;
     cin >> n >> m;
@@ -38,38 +75,7 @@ int main() {
     for (size_t i = 0; i < copy; ++i) {
         dp[0][i] = 1;
     }
-    for (size_t i = 0; i < m - 1; ++i) {
-        for (size_t j = 0; j < copy; ++j) {
-            pair<bool, bool> a = alg(mas, j, i);
-            if((a.first) && (a.second)) {
-                pair<bool, bool> h = alg(mas, j, i + 1);
-                if (h.first) {
-                    auto t = dp[i + 1][j] + dp[i][j];
-                    dp[i + 1][j] = t % mod;
-                }
-                pair<bool, bool> h1 = alg(mas, j^((1 << n)-1), i+1);
-                if (h1.first) {
-                    auto t = dp[i + 1][j^(copy - 1)] + dp[i][j];
-                    dp[i+1][j^((1 << n)-1)] = t % mod;
-                }
-            }
-            else if(a.first) {
-                pair<bool, bool> h1 = alg(mas, j^(copy - 1), i+1);
-                if (h1.first) {
-                    auto t = dp[i+1][j^((1 << n)-1)] + dp[i][j];
-                    dp[i+1][j^((1 << n)-1)] = t % mod;
-                }
-            }
-        }
-    }
-    long long answer = 0;
-    for (size_t j = 0; j < copy; ++j) {
-        pair<bool, bool> a = alg(mas, j, m-1);
-        if (a.first) {
-            auto copy1 = (answer + dp[m - 1][j]);
-            answer = copy1 % mod;
-        }
-    }
+    long long answer = get_hungry(mas, m, n, dp);
     cout << answer;
 
 }
