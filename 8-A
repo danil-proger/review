@@ -5,12 +5,8 @@
 #include <string>
 
 using namespace std;
-vector<vector<int>> g;
-vector<int> d;
-vector<int> parent;
-queue<int> q;
 
-void input() {
+void input(vector<vector<int>> &g) {
     for (int i = 11; i < 89; ++i) {
         if (i % 10 != 9 && i % 10 != 0) {
             vector<int> result;
@@ -28,7 +24,7 @@ void input() {
     }
 }
 
-void findDist() {
+void findDist(queue<int> q, vector<vector<int>> &g, vector<int> &d, vector<int> &parent) {
     while (!q.empty()) {
         int v = q.front();
         for (int to: g[v - 11]) {
@@ -42,7 +38,7 @@ void findDist() {
     }
 }
 
-void answer(vector<string>& route, int second_cell) {
+void answer(vector<string>& route, int second_cell, vector<int> &d, vector<int> &parent) {
     int p = second_cell;
     int r = d[second_cell - 11];
 
@@ -62,20 +58,24 @@ void answer(vector<string>& route, int second_cell) {
 }
 
 int main() {
+    vector<vector<int>> g;
+    vector<int> d;
+    vector<int> parent;
+    queue<int> q;
     string x, y;
     cin >> x >> y;
 
     g.resize(100);
     d.resize(78, -1);
     parent.resize(78, -1);
-    input();
+    input(g);
 
     int first_cell = (int(x[0]) - 96) * 10 + int(x[1]) - 48;
     d[first_cell - 11] = 0;
     q.push(first_cell);
     int second_cell = (int(y[0]) - 96) * 10 + int(y[1]) - 48;
 
-    findDist();
+    findDist(q, g, d, parent);
 
     vector<string> route;
     string result;
@@ -85,5 +85,5 @@ int main() {
     result += second;
     route.push_back(result);
 
-    answer(route, second_cell);
+    answer(route, second_cell, d, parent);
 }
