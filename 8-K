@@ -1,0 +1,202 @@
+#include <iostream>
+#include <queue>
+#include <unordered_map>
+#include <unordered_set>
+
+#pragma optimize("O3")
+#pragma GCC optimize("Fast,no-stack-protector")
+#pragma GCC target("sse4")
+
+using namespace std;
+
+uint64_t Tag(uint64_t pos, uint64_t ind) {
+    return (pos >> (15 - ind) * 4) % 16;
+}
+
+uint64_t manhatan(uint64_t pos) {
+    uint64_t m = 0;
+    long long k;
+    for (int i = 0; i < 16; ++i) {
+        k = Tag(pos, i);
+        if (k) {
+            auto sum = abs(i % 4 - (k - 1) % 4) + abs(i / 4 - (k - 1) / 4);
+            m += sum;
+        }
+    }
+    return m;
+}
+
+uint64_t conflict(uint64_t pos) {
+    uint64_t result = 0;
+    if ( Tag(pos, 12) != 13 && Tag(pos, 8) == 9 && Tag(pos, 13) == 14) result += 2;
+    if (Tag(pos, 0) != 1 && Tag(pos, 1) == 2 && Tag(pos, 4) == 5) result += 2;
+    if (Tag(pos, 7) == 8 && Tag(pos, 3) != 4 && Tag(pos, 2) == 3) result += 2;
+    return result;
+}
+
+uint64_t Zero(uint64_t pos) {
+    for (uint64_t i = 0; i < 16; ++i) {
+        if (!Tag(pos, i)) {
+            return i;
+        }
+    }
+}
+
+uint64_t pos(uint64_t ind, uint64_t pos, uint64_t index) {
+    uint64_t b = Tag(pos, ind);
+    pos -= (b << (15 - ind) * 4);
+    pos += (b << (15 - index) * 4);
+    return pos;
+}
+
+bool alg() {
+
+}
+
+int lineal(uint64_t pos) {
+    vector<size_t> a(4);
+    int result = 0;
+    vector<size_t> b(4);
+    for (size_t i = 0; i < 4; ++i) {
+        for (size_t j = 0; j < 4; ++j) {
+            a[j] = Tag(pos, j * 4 + i) - 1;
+            b[j] = Tag(pos, i * 4 + j) - 1;
+        }
+        for (size_t j = 1; j < 4; ++j) {
+            if (a[j] != -1) {
+                for (size_t r = 0; r < j; ++r) {
+                    if (i == a[r] % 4 && a[j] < a[r] && a[j] % 4 == i) ++result;
+                }
+            }
+            if (b[j] != -1) {
+                for (size_t r = 0; r < j; ++r) {
+                    if (i == b[r] / 4 && b[j] < b[r] && b[j] / 4 == i) ++result;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+bool correct(uint64_t pos) {
+    uint64_t pos_z = Zero(pos);
+    uint64_t k = pos_z / 4 + 1;
+    for (uint64_t i = 0; i < 16; ++i) {
+        size_t copy_i = Tag(pos, i);
+        if (copy_i) {
+            for (uint64_t j = 0; j < i; ++j) {
+                size_t copy_j = Tag(pos, j);
+                if (copy_i < copy_j) {
+                    ++k;
+                }
+            }
+        }
+    }
+    return (k % 2 == 0);
+}
+
+string tag(uint64_t start, uint64_t finish) {
+    auto comp = [](const pair<int, uint64_t>& a, const pair<int, uint64_t>& b) {return a.first > b.first;};
+    unordered_map<uint64_t , int> result;
+    unordered_map<uint64_t, char> parent;
+    unordered_set<uint64_t> used;
+    if (!correct(start)) {
+        cout << -1 << endl;
+        return "";
+    }
+    priority_queue<pair<int, uint64_t>, vector<pair<int, uint64_t>>, decltype(comp) > heap(comp);
+    heap.push({0, start});
+    unordered_map<uint64_t, int> d;
+    d[start] = 0;
+    while (!heap.empty()) {
+        auto v = heap.top();
+        heap.pop();
+        if (v.second == finish) break;
+        if (used.find(v.second) != used.end()) continue;
+        used.insert(v.second);
+        uint64_t index = Zero(v.second);
+
+        if (index / 4 != 0) {
+            uint64_t to = pos(index - 4, v.second, index);
+            auto copy = d[v.second];
+            ++copy;
+            if (used.find(to) == used.end() || d[to] > copy ) {
+                heap.push({copy + (manhatan(to)) + lineal(to) + conflict(to) * 10 / 9, to});
+                d[to] = copy;
+                parent[to] = 'D';
+            }
+        }
+
+        if (index % 4 != 0) {
+            uint64_t to = pos(index - 1, v.second, index);
+            auto copy = d[v.second];
+            ++copy;
+            if (used.find(to) == used.end() || d[to] > copy ) {
+                heap.push({copy + (manhatan(to)) + lineal(to) + conflict(to) * 10 / 9, to});
+                d[to] = copy;
+                parent[to] = 'R';
+            }
+        }
+
+        if (index / 4 != 3) {
+            uint64_t to = pos(index + 4, v.second, index);
+            auto copy = d[v.second];
+            ++copy;
+            if (used.find(to) == used.end() || d[to] > copy ) {
+                heap.push({copy + (manhatan(to)) + lineal(to) + conflict(to) * 10 / 9, to});
+                d[to] = copy;
+                parent[to] = 'U';
+            }
+        }
+
+        if (index % 4 != 3) {
+            uint64_t to = pos(index + 1, v.second, index);
+            auto copy = d[v.second];
+            ++copy;
+            if (used.find(to) == used.end() || d[to] > copy ) {
+                heap.push({copy + (manhatan(to)) + lineal(to) + conflict(to) * 10 / 9, to});
+                d[to] = copy;
+                parent[to] = 'L';
+            }
+        }
+    }
+    string ans;
+    while (finish != start) {
+        uint64_t index = Zero(finish);
+        int res;
+        char ls = parent[finish];
+        ans = ls + ans;
+        if (ls == 'D') {
+            finish = pos(index + 4, finish, index);
+        }
+        else if (ls == 'U') {
+            finish = pos(index - 4, finish, index);
+        }
+        else if (ls == 'L') {
+            finish = pos(index - 1, finish, index);
+        }
+        else {
+            finish = pos(index + 1, finish, index);
+        }
+    }
+    return ans;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    uint64_t start = 0;
+    uint64_t finish = 0;
+
+    for (size_t i = 0; i < 16; ++i) {
+        uint64_t n;
+        cin >> n;
+        start += (n << ((15 - i) * 4));
+        finish += ((i + 1) % 16) << ((15 - i) * 4);
+    }
+
+    string ans = tag(start, finish);
+    cout << ans.length() << endl;
+    cout << ans << endl;
+}
