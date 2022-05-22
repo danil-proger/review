@@ -1,0 +1,89 @@
+#include <iostream>
+#include <vector>
+#include <set>
+#include <queue>
+#include <string>
+
+using namespace std;
+
+void input(vector<vector<int>> &g) {
+    for (int i = 11; i < 89; ++i) {
+        if (i % 10 != 9 && i % 10 != 0) {
+            vector<int> result;
+            vector<int> cells = {i + 12, i + 21, i + 19, i + 8, i - 12, i - 21, i - 19, i - 8};
+            for (size_t i = 0; i < cells.size(); ++i) {
+                auto help = cells[i];
+                if (!(help % 10 == 0 || help % 10 == 9 || help < 11 || help > 89)) {
+                    result.push_back(help);
+                }
+            }
+            for (int j = 0; j < result.size(); ++j) {
+                g[i - 11].push_back(result[j]);
+            }
+        }
+    }
+}
+
+void findDist(queue<int> q, vector<vector<int>> &g, vector<int> &d, vector<int> &parent) {
+    while (!q.empty()) {
+        int v = q.front();
+        for (int to: g[v - 11]) {
+            if (d[to - 11] == -1) {
+                parent[to - 11] = v;
+                d[to - 11] = d[v - 11] + 1;
+                q.push(to);
+            }
+        }
+        q.pop();
+    }
+}
+
+void answer(vector<string>& route, int second_cell, vector<int> &d, vector<int> &parent) {
+    int p = second_cell;
+    int r = d[second_cell - 11];
+
+    for (int i = 0; i < r; ++i) {
+        string res;
+        p = parent[p - 11];
+        char first = 'a' - 1 + p / 10;
+        char second = '0' + p % 10;
+        res += first;
+        res += second;
+        route.push_back(res);
+    }
+
+    for (int i = route.size() - 1; i >= 0; --i) {
+        cout << route[i] << '\n';
+    }
+}
+
+int main() {
+    vector<vector<int>> g;
+    vector<int> d;
+    vector<int> parent;
+    queue<int> q;
+    string x, y;
+    cin >> x >> y;
+
+    g.resize(100);
+    d.resize(78, -1);
+    parent.resize(78, -1);
+    input(g);
+
+    int first_cell = (int(x[0]) - 96) * 10 + int(x[1]) - 48;
+    d[first_cell - 11] = 0;
+    q.push(first_cell);
+    int second_cell = (int(y[0]) - 96) * 10 + int(y[1]) - 48;
+
+    findDist(q, g, d, parent);
+
+    vector<string> route;
+    string result;
+    char first = 'a' - 1 + second_cell / 10;
+    char second = '0' + second_cell % 10;
+    result += first;
+    result += second;
+    route.push_back(result);
+
+    answer(route, second_cell, d, parent);
+}
