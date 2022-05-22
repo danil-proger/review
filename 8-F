@@ -1,0 +1,52 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+
+using namespace std;
+int inf = 10e6;
+
+void Diikstra(queue<pair<int, int>> &q, vector<vector<pair<int, int>>> &g, vector<int> &dist){
+    while(!q.empty()) {
+        auto a = q.front();
+        q.pop();
+        if (-(a.first) > dist[a.second]) {
+            continue;
+        }
+        for (size_t i = 0; i < g[a.second].size(); ++i) {
+            auto y = g[a.second][i];
+            int sum = dist[a.second] + y.second;
+            if (dist[y.first] > sum) {
+                dist[y.first] = sum;
+                q.push({-dist[y.first], y.first});
+            }
+        }
+    }
+}
+
+int main() {
+    vector<vector<pair<int, int>>> g;
+    queue<pair<int, int>> q;
+    vector<int> dist;
+    int n, m, s, t;
+    cin >> n >> m >> s >> t;
+    g.resize(n);
+    --s; --t;
+    dist.resize(n, inf);
+    dist[s] = 0;
+    q.push({0, s});
+    for (size_t i = 0; i < m; ++i) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        --u; --v;
+        g[u].push_back({v, w});
+        g[v].push_back({u, w});
+    }
+
+    Diikstra(q, g, dist);
+    if (dist[t] == inf) {
+        cout << -1 << endl;
+    }
+    else {
+        cout << dist[t] << endl;
+    }
+}
