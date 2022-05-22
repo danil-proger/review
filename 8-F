@@ -4,11 +4,8 @@
 
 using namespace std;
 int inf = 10e6;
-vector<vector<pair<int, int>>> g;
-queue<pair<int, int>> q;
-vector<int> dist;
 
-void Diikstra(){
+void Diikstra(queue<pair<int, int>> &q, vector<vector<pair<int, int>>> &g, vector<int> &dist){
     while(!q.empty()) {
         auto a = q.front();
         q.pop();
@@ -27,6 +24,9 @@ void Diikstra(){
 }
 
 int main() {
+    vector<vector<pair<int, int>>> g;
+    queue<pair<int, int>> q;
+    vector<int> dist;
     int n, m, s, t;
     cin >> n >> m >> s >> t;
     g.resize(n);
@@ -42,7 +42,7 @@ int main() {
         g[v].push_back({u, w});
     }
 
-    Diikstra();
+    Diikstra(q, g, dist);
     if (dist[t] == inf) {
         cout << -1 << endl;
     }
